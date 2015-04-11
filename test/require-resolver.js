@@ -4,11 +4,11 @@
 
 var assert = require('assert')
 var _ = require('lodash')
-var garcon = require('../')
+var inversio = require('../')
 
 describe('require resolver', function () {
   it('can resolve using builtin require(): inject("require:lodash")', function (done) {
-    garcon()
+    inversio()
       .inject('require:lodash', function (ld) { return ld })
       .then(function (ld) {
         assert(_ === ld)

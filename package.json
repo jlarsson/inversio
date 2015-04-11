@@ -1,6 +1,6 @@
 {
-  "name": "garcon",
-  "version": "1.0.0",
+  "name": "inversio",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jlarsson/garcon.git"
+    "url": "https://github.com/jlarsson/inversio.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jlarsson/garcon/issues"
+    "url": "https://github.com/jlarsson/inversio/issues"
   },
-  "homepage": "https://github.com/jlarsson/garcon",
+  "homepage": "https://github.com/jlarsson/inversio",
   "dependencies": {
     "debug": "^2.1.3",
     "lodash": "^3.6.0",

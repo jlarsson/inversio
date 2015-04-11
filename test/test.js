@@ -4,11 +4,11 @@
 
 var assert = require('assert')
 var _ = require('lodash')
-var garcon = require('../')
+var inversio = require('../')
 
 describe('container.inject', function () {
   it('build object graphs correctly', function (done) {
-    garcon()
+    inversio()
       .service({name: 'a', depends: ['b', 'c'], factory: function (b, c) {
         return {n: 'a', b: b, c: c}
       }})
@@ -37,21 +37,21 @@ describe('container.inject', function () {
   })
 
   it('throws on circular dependencies', function (done) {
-    garcon()
+    inversio()
       .service({name: 'a', depends: ['b'], factory: _.noop})
       .service({name: 'b', depends: ['c'], factory: _.noop})
       .service({name: 'c', depends: ['a'], factory: _.noop})
       .inject('a', function (a) {
         assert.fail('should never reach this')
       })
-      .catch(supressGarconError.bind(null, 'CircularDependency'))
+      .catch(supressinversioError.bind(null, 'CircularDependency'))
       .then(done, done)
   })
 
   it('throws on unknown namespaces: inject("unkown:unseen")', function (done) {
-    garcon()
+    inversio()
       .inject('?:foo')
-      .catch(supressGarconError.bind(null, 'UnknownNamespace'))
+      .catch(supressinversioError.bind(null, 'UnknownNamespace'))
       .then(done, done)
   })
 })
@@ -62,7 +62,7 @@ describe('container.inject', function () {
   var s3 = {z: 'this is yet another service instance'}
 
   function createContainer (argument) {
-    return garcon()
+    return inversio()
       .service(
         createRegistration('s1', s1),
         createRegistration('s2', s2),
@@ -111,58 +111,58 @@ describe('container.inject', function () {
 
 describe('container.service({name,depends,tags,factory}) parameter validation', function () {
   it('fails if name is not unique', function () {
-    assertGarconThrows('ServiceNameDuplicate', function () {
-      garcon()
+    assertinversioThrows('ServiceNameDuplicate', function () {
+      inversio()
       .service({name: 'a', factory: _.noop})
       .service({name: 'a', factory: _.noop})
     })
   })
   it('fails if name is empty', function () {
-    assertGarconThrows('ServiceNameIsEmpty', function () {
-      garcon().service({})
+    assertinversioThrows('ServiceNameIsEmpty', function () {
+      inversio().service({})
     })
   })
   it('fails if name is not a string', function () {
-    assertGarconThrows('ServiceNameIsNotString', function () {
-      garcon().service({name: 1})
+    assertinversioThrows('ServiceNameIsNotString', function () {
+      inversio().service({name: 1})
     })
-    assertGarconThrows('ServiceNameIsNotString', function () {
-      garcon().service({name: {}})
+    assertinversioThrows('ServiceNameIsNotString', function () {
+      inversio().service({name: {}})
     })
   })
   it('fails if factory is not defined', function () {
-    assertGarconThrows('ServiceHasNoFactory', function () {
-      garcon().service({name: 's'})
+    assertinversioThrows('ServiceHasNoFactory', function () {
+      inversio().service({name: 's'})
     })
   })
   it('fails if factory is not a function', function () {
-    assertGarconThrows('ServiceFactoryIsNotFunction', function () {
-      garcon().service({name: 's', factory: {}})
+    assertinversioThrows('ServiceFactoryIsNotFunction', function () {
+      inversio().service({name: 's', factory: {}})
     })
   })
   it('fails if depends is not array', function () {
-    assertGarconThrows('ServiceDependsNotArray', function () {
-      garcon().service({name: 's', factory: _.noop, depends: {}})
+    assertinversioThrows('ServiceDependsNotArray', function () {
+      inversio().service({name: 's', factory: _.noop, depends: {}})
     })
   })
   it('fails if tags is not array', function () {
-    assertGarconThrows('ServiceTagsNotArray', function () {
-      garcon().service({name: 's', factory: _.noop, tags: {}})
+    assertinversioThrows('ServiceTagsNotArray', function () {
+      inversio().service({name: 's', factory: _.noop, tags: {}})
     })
   })
 })
 
-function supressGarconError (code, err) {
-  if (!(err && (err.garcon_reason === code))) {
+function supressinversioError (code, err) {
+  if (!(err && (err.code === code))) {
     throw err
   }
 }
 
-function assertGarconThrows (code, f) {
+function assertinversioThrows (code, f) {
   try {
     f()
     assert.fail('Expected exception %s', code)
   } catch (e) {
-    supressGarconError(code, e)
+    supressinversioError(code, e)
   }
 }

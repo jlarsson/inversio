@@ -3,11 +3,11 @@
 'use strict'
 
 var assert = require('assert')
-var garcon = require('../')
+var inversio = require('../')
 
 describe('tag resolver', function () {
   it('can resolve a list of services matching tag: inject("tag:cool stuff")', function (done) {
-    garcon()
+    inversio()
       .service(
         makeService('a', 'A', ['boring', 'cool stuff']),
         makeService('b', 'B', ['cool stuff']),
