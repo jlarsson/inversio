@@ -34,7 +34,7 @@ container.component({
 > ```name``` must be unique and can be used by dependant components to reference the component.
 ```factory``` is a function that returns a service instance or a promised service instance.
 
-> ** Important**: the factory is invoked only once during the container lifetime, effectively making components singletons.
+> **Important**: the factory is invoked only once during the container lifetime, effectively making components singletons.
 
 ### Register dependent components
 ```js
