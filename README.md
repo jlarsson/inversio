@@ -183,7 +183,7 @@ function configureDatabase() {
 > In practice, code dependent on required components are tricky to test in isolation.
 
 ```require('../../../../foo/bar')``` and other hard to track dependencies will be the price for maintaining an otherwise sound project structure.
-> Any structure of practice that makes refactoring harder, affects quality (negatively)
+> Any structure or practice that makes refactoring harder, affects quality (negatively)
 
 Sharing global policies can be tricky.
 > A simple task such as loading and parsing configuration properties often leads to duplicated code.
