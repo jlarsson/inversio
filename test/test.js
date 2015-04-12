@@ -44,14 +44,14 @@ describe('container.inject', function () {
       .inject('a', function (a) {
         assert.fail('should never reach this')
       })
-      .catch(supressinversioError.bind(null, 'CircularDependency'))
+      .catch(supressInversioError.bind(null, 'CircularDependency'))
       .then(done, done)
   })
 
   it('throws on unknown namespaces: inject("unkown:unseen")', function (done) {
     inversio()
       .inject('?:foo')
-      .catch(supressinversioError.bind(null, 'UnknownNamespace'))
+      .catch(supressInversioError.bind(null, 'UnknownNamespace'))
       .then(done, done)
   })
 })
@@ -111,58 +111,58 @@ describe('container.inject', function () {
 
 describe('container.component({name,depends,tags,factory}) parameter validation', function () {
   it('fails if name is not unique', function () {
-    assertinversioThrows('ComponentNameDuplicate', function () {
+    assertInversioThrows('ComponentNameDuplicate', function () {
       inversio()
       .component({name: 'a', factory: _.noop})
       .component({name: 'a', factory: _.noop})
     })
   })
   it('fails if name is empty', function () {
-    assertinversioThrows('ComponentNameIsEmpty', function () {
+    assertInversioThrows('ComponentNameIsEmpty', function () {
       inversio().component({})
     })
   })
   it('fails if name is not a string', function () {
-    assertinversioThrows('ComponentNameIsNotString', function () {
+    assertInversioThrows('ComponentNameIsNotString', function () {
       inversio().component({name: 1})
     })
-    assertinversioThrows('ComponentNameIsNotString', function () {
+    assertInversioThrows('ComponentNameIsNotString', function () {
       inversio().component({name: {}})
     })
   })
   it('fails if factory is not defined', function () {
-    assertinversioThrows('ComponentHasNoFactory', function () {
+    assertInversioThrows('ComponentHasNoFactory', function () {
       inversio().component({name: 's'})
     })
   })
   it('fails if factory is not a function', function () {
-    assertinversioThrows('ComponentFactoryIsNotFunction', function () {
+    assertInversioThrows('ComponentFactoryIsNotFunction', function () {
       inversio().component({name: 's', factory: {}})
     })
   })
   it('fails if depends is not array', function () {
-    assertinversioThrows('ComponentDependsNotArray', function () {
+    assertInversioThrows('ComponentDependsNotArray', function () {
       inversio().component({name: 's', factory: _.noop, depends: {}})
     })
   })
   it('fails if tags is not array', function () {
-    assertinversioThrows('ComponentTagsNotArray', function () {
+    assertInversioThrows('ComponentTagsNotArray', function () {
       inversio().component({name: 's', factory: _.noop, tags: {}})
     })
   })
 })
 
-function supressinversioError (code, err) {
+function supressInversioError (code, err) {
   if (!(err && (err.code === code))) {
     throw err
   }
 }
 
-function assertinversioThrows (code, f) {
+function assertInversioThrows (code, f) {
   try {
     f()
     assert.fail('Expected exception %s', code)
   } catch (e) {
-    supressinversioError(code, e)
+    supressInversioError(code, e)
   }
 }

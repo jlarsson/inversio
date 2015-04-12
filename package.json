@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "files": ["index.js", "lib/*.js"],
+  "files": [
+    "index.js",
+    "lib/*.js"
+  ],
   "scripts": {
     "test": "mocha"
   },
@@ -23,6 +26,8 @@
     "native-or-bluebird": "^1.2.0"
   },
   "devDependencies": {
+    "express": "^4.12.3",
+    "jade": "^1.9.2",
     "mocha": "^2.2.4"
   }
 }
