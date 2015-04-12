@@ -7,9 +7,6 @@ A working dependency injection system for express and koa.
 [![license][license-image]][license-url]
 [![js-standard-style][standard-image]](standard-url)
 
-## Dependencies
-If your version of node lacks a native Promise implementation, install [bluebird](https://www.npmjs.com/package/bluebird).
-
 ## Motivation
 - I needed a clean and intuitive way of organizing large applications into truly separate modules
 - I wanted out of require-hell
@@ -19,6 +16,8 @@ Before this write up, I have tried approaches such as [this](https://strongloop.
 [Architect from Cloud9](https://github.com/c9/architect) was my previous first choice for DI, and if you don't like this, try that out.
 
 ## The basics
+
+Make sure you have a version of node with a native (or shim) Promise implementation. Otherwise, just install [bluebird](https://www.npmjs.com/package/bluebird).
 
 ### Create a container
 ```js
