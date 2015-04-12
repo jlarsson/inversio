@@ -16,7 +16,7 @@ If your version of node lacks a native Promise implementation, install [bluebird
 
 Before this write up, I have tried approaches such as [this](https://strongloop.com/strongblog/modular-node-js-express/) and different [libraries](http://www.mariocasciaro.me/dependency-injection-in-node-js-and-other-architectural-patterns), with little satisfaction.
 
-[https://github.com/c9/architect](Architect) was my previous first choice for DI, and if you don't like this, try that out.
+[Architect from Cloud9](https://github.com/c9/architect) was my previous first choice for DI, and if you don't like this, try that out.
 
 ## The basics
 
