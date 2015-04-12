@@ -22,6 +22,6 @@ modules.map(function (name) {
   return inversio
 }, inversio())
 .inject('app', 'tag:route', function (app) {
-  debug('express apllication listing to port %s', port)
+  debug('express application listing to port %s', port)
   app.listen(port)
 })
