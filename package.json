@@ -1,12 +1,13 @@
 {
   "name": "inversio",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "files": [
     "index.js",
     "lib/*.js"
   ],
+  "keywords": ["di", "dependency", "dependency injection", "dependency inversion", "container"],
   "scripts": {
     "test": "mocha"
   },
