@@ -8,7 +8,7 @@ var inversio = require('../')
 describe('tag resolver', function () {
   it('can resolve a list of services matching tag: inject("tag:cool stuff")', function (done) {
     inversio()
-      .service(
+      .component(
         makeService('a', 'A', ['boring', 'cool stuff']),
         makeService('b', 'B', ['cool stuff']),
         makeService('c', 'C', ['what?'])

@@ -9,13 +9,13 @@ var inversio = require('../')
 describe('container.inject', function () {
   it('build object graphs correctly', function (done) {
     inversio()
-      .service({name: 'a', depends: ['b', 'c'], factory: function (b, c) {
+      .component({name: 'a', depends: ['b', 'c'], factory: function (b, c) {
         return {n: 'a', b: b, c: c}
       }})
-      .service({name: 'b', depends: ['c'], factory: function (c) {
+      .component({name: 'b', depends: ['c'], factory: function (c) {
         return {n: 'b', c: c}
       }})
-      .service({name: 'c', factory: function () {
+      .component({name: 'c', factory: function () {
         return {n: 'c'}
       }})
       .inject('a', function (a) { return a })
@@ -38,9 +38,9 @@ describe('container.inject', function () {
 
   it('throws on circular dependencies', function (done) {
     inversio()
-      .service({name: 'a', depends: ['b'], factory: _.noop})
-      .service({name: 'b', depends: ['c'], factory: _.noop})
-      .service({name: 'c', depends: ['a'], factory: _.noop})
+      .component({name: 'a', depends: ['b'], factory: _.noop})
+      .component({name: 'b', depends: ['c'], factory: _.noop})
+      .component({name: 'c', depends: ['a'], factory: _.noop})
       .inject('a', function (a) {
         assert.fail('should never reach this')
       })
@@ -63,12 +63,12 @@ describe('container.inject', function () {
 
   function createContainer (argument) {
     return inversio()
-      .service(
-        createRegistration('s1', s1),
-        createRegistration('s2', s2),
-        createRegistration('s3', s3))
+      .component(
+        createServiceComponent('s1', s1),
+        createServiceComponent('s2', s2),
+        createServiceComponent('s3', s3))
   }
-  it('inject([a, b, c], f) -> f(service(a), service(b), service(c))', function (done) {
+  it('inject([a, b, c], f) -> f(component(a), component(b), component(c))', function (done) {
     createContainer()
     .inject(['s1', 's2', 's3'], function (a1, a2, a3) {
       assert.deepEqual([s1, s2, s3], [a1, a2, a3])
@@ -80,7 +80,7 @@ describe('container.inject', function () {
     .then(done, done)
   })
 
-  it('inject(a, b, c, f) -> f(service(a), service(b), service(c))', function (done) {
+  it('inject(a, b, c, f) -> f(component(a), component(b), component(c))', function (done) {
     createContainer()
       .inject('s1', 's2', 's3', function (a1, a2, a3) {
         assert.deepEqual([s1, s2, s3], [a1, a2, a3])
@@ -92,7 +92,7 @@ describe('container.inject', function () {
       .then(done, done)
   })
 
-  it('inject(a, b, c) -> [service(a), service(b), service(c)] if no callback', function (done) {
+  it('inject(a, b, c) -> [component(a), component(b), component(c)] if no callback', function (done) {
     createContainer()
     .inject('s1', 's2', 's3')
     .then(function (l) {
@@ -102,52 +102,52 @@ describe('container.inject', function () {
     .catch(done)
   })
 
-  function createRegistration (name, service) {
+  function createServiceComponent (name, service) {
     return {name: name, factory: function () {
       return service
     }}
   }
 })
 
-describe('container.service({name,depends,tags,factory}) parameter validation', function () {
+describe('container.component({name,depends,tags,factory}) parameter validation', function () {
   it('fails if name is not unique', function () {
-    assertinversioThrows('ServiceNameDuplicate', function () {
+    assertinversioThrows('ComponentNameDuplicate', function () {
       inversio()
-      .service({name: 'a', factory: _.noop})
-      .service({name: 'a', factory: _.noop})
+      .component({name: 'a', factory: _.noop})
+      .component({name: 'a', factory: _.noop})
     })
   })
   it('fails if name is empty', function () {
-    assertinversioThrows('ServiceNameIsEmpty', function () {
-      inversio().service({})
+    assertinversioThrows('ComponentNameIsEmpty', function () {
+      inversio().component({})
     })
   })
   it('fails if name is not a string', function () {
-    assertinversioThrows('ServiceNameIsNotString', function () {
-      inversio().service({name: 1})
+    assertinversioThrows('ComponentNameIsNotString', function () {
+      inversio().component({name: 1})
     })
-    assertinversioThrows('ServiceNameIsNotString', function () {
-      inversio().service({name: {}})
+    assertinversioThrows('ComponentNameIsNotString', function () {
+      inversio().component({name: {}})
     })
   })
   it('fails if factory is not defined', function () {
-    assertinversioThrows('ServiceHasNoFactory', function () {
-      inversio().service({name: 's'})
+    assertinversioThrows('ComponentHasNoFactory', function () {
+      inversio().component({name: 's'})
     })
   })
   it('fails if factory is not a function', function () {
-    assertinversioThrows('ServiceFactoryIsNotFunction', function () {
-      inversio().service({name: 's', factory: {}})
+    assertinversioThrows('ComponentFactoryIsNotFunction', function () {
+      inversio().component({name: 's', factory: {}})
     })
   })
   it('fails if depends is not array', function () {
-    assertinversioThrows('ServiceDependsNotArray', function () {
-      inversio().service({name: 's', factory: _.noop, depends: {}})
+    assertinversioThrows('ComponentDependsNotArray', function () {
+      inversio().component({name: 's', factory: _.noop, depends: {}})
     })
   })
   it('fails if tags is not array', function () {
-    assertinversioThrows('ServiceTagsNotArray', function () {
-      inversio().service({name: 's', factory: _.noop, tags: {}})
+    assertinversioThrows('ComponentTagsNotArray', function () {
+      inversio().component({name: 's', factory: _.noop, tags: {}})
     })
   })
 })
