@@ -5,7 +5,7 @@ A working dependency injection system for express and koa.
 [![npm][npm-image]][npm-url]
 [![travis][travis-image]][travis-url]
 [![license][license-image]][license-url]
-[![js-standard-style][standard-image]](standard-url)
+[![js-standard-style][standard-image]][standard-url]
 
 ## Motivation
 - I needed a clean and intuitive way of organizing large applications into truly separate modules
