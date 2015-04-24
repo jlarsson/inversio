@@ -7,8 +7,8 @@ var _ = require('lodash')
 var inversio = require('../')
 
 describe('container.inject', function () {
-  it('build object graphs correctly', function (done) {
-    inversio()
+  it('builds object graphs correctly', function () {
+    return inversio()
       .component({name: 'a', depends: ['b', 'c'], factory: function (b, c) {
         return {n: 'a', b: b, c: c}
       }})
@@ -33,11 +33,10 @@ describe('container.inject', function () {
           }
         }, a)
       })
-      .then(done, done)
   })
 
-  it('throws on circular dependencies', function (done) {
-    inversio()
+  it('throws on circular dependencies', function () {
+    return inversio()
       .component({name: 'a', depends: ['b'], factory: _.noop})
       .component({name: 'b', depends: ['c'], factory: _.noop})
       .component({name: 'c', depends: ['a'], factory: _.noop})
@@ -45,14 +44,18 @@ describe('container.inject', function () {
         assert.fail('should never reach this')
       })
       .catch(supressInversioError.bind(null, 'CircularDependency'))
-      .then(done, done)
   })
 
-  it('throws on unknown namespaces: inject("unkown:unseen")', function (done) {
-    inversio()
-      .inject('?:foo')
-      .catch(supressInversioError.bind(null, 'UnknownNamespace'))
-      .then(done, done)
+  it('caches components, i.e effectively hands out singletons', function () {
+    return inversio()
+      .component({name: 'a', factory: function () { return {name: 'a'}}})
+      .component({name: 'b', depends: ['a'], factory: function (a) { return {name: 'b', a: a}}})
+      .inject('a', 'b', 'a', function (a0, b, a1) {
+        assert.deepEqual(a0, {name: 'a'})
+        assert.deepEqual(b, {name: 'b', a: a0})
+        assert(a0 === a1)
+        assert(a0 === b.a)
+      })
   })
 })
 
@@ -68,8 +71,9 @@ describe('container.inject', function () {
         createServiceComponent('s2', s2),
         createServiceComponent('s3', s3))
   }
-  it('inject([a, b, c], f) -> f(component(a), component(b), component(c))', function (done) {
-    createContainer()
+
+  it('inject([a, b, c], f) -> f(component(a), component(b), component(c))', function () {
+    return createContainer()
     .inject(['s1', 's2', 's3'], function (a1, a2, a3) {
       assert.deepEqual([s1, s2, s3], [a1, a2, a3])
       return 'ok'
@@ -77,11 +81,10 @@ describe('container.inject', function () {
     .then(function (v) {
       assert.equal('ok', v)
     })
-    .then(done, done)
   })
 
-  it('inject(a, b, c, f) -> f(component(a), component(b), component(c))', function (done) {
-    createContainer()
+  it('inject(a, b, c, f) -> f(component(a), component(b), component(c))', function () {
+    return createContainer()
       .inject('s1', 's2', 's3', function (a1, a2, a3) {
         assert.deepEqual([s1, s2, s3], [a1, a2, a3])
         return 'ok'
@@ -89,17 +92,14 @@ describe('container.inject', function () {
       .then(function (v) {
         assert.equal('ok', v)
       })
-      .then(done, done)
   })
 
-  it('inject(a, b, c) -> [component(a), component(b), component(c)] if no callback', function (done) {
+  it('inject(a, b, c) -> [component(a), component(b), component(c)] if no callback', function () {
     createContainer()
     .inject('s1', 's2', 's3')
     .then(function (l) {
       assert.deepEqual([s1, s2, s3], l)
-      done()
     })
-    .catch(done)
   })
 
   function createServiceComponent (name, service) {
@@ -117,11 +117,13 @@ describe('container.component({name,depends,tags,factory}) parameter validation'
       .component({name: 'a', factory: _.noop})
     })
   })
+
   it('fails if name is empty', function () {
     assertInversioThrows('ComponentNameIsEmpty', function () {
       inversio().component({})
     })
   })
+
   it('fails if name is not a string', function () {
     assertInversioThrows('ComponentNameIsNotString', function () {
       inversio().component({name: 1})
@@ -130,21 +132,25 @@ describe('container.component({name,depends,tags,factory}) parameter validation'
       inversio().component({name: {}})
     })
   })
+
   it('fails if factory is not defined', function () {
     assertInversioThrows('ComponentHasNoFactory', function () {
       inversio().component({name: 's'})
     })
   })
+
   it('fails if factory is not a function', function () {
     assertInversioThrows('ComponentFactoryIsNotFunction', function () {
       inversio().component({name: 's', factory: {}})
     })
   })
+
   it('fails if depends is not array', function () {
     assertInversioThrows('ComponentDependsNotArray', function () {
       inversio().component({name: 's', factory: _.noop, depends: {}})
     })
   })
+
   it('fails if tags is not array', function () {
     assertInversioThrows('ComponentTagsNotArray', function () {
       inversio().component({name: 's', factory: _.noop, tags: {}})
