@@ -7,7 +7,13 @@
     "index.js",
     "lib/*.js"
   ],
-  "keywords": ["di", "dependency", "dependency injection", "dependency inversion", "container"],
+  "keywords": [
+    "di",
+    "dependency",
+    "dependency injection",
+    "dependency inversion",
+    "container"
+  ],
   "scripts": {
     "test": "mocha"
   },
@@ -29,7 +35,9 @@
   "devDependencies": {
     "bluebird": "^2.9.24",
     "express": "^4.12.3",
+    "glob": "^5.0.5",
     "jade": "^1.9.2",
-    "mocha": "^2.2.4"
+    "mocha": "^2.2.4",
+    "thenify": "^3.1.0"
   }
 }

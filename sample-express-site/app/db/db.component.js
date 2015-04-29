@@ -2,8 +2,8 @@
 
 var debug = require('debug')('sample')
 
-module.exports.register = function (inversio) {
-  inversio.component({
+module.exports.register = function (container) {
+  container.component({
     name: 'db',
     factory: createDatabase
   })

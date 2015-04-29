@@ -1,7 +1,7 @@
 'use strict'
 
-module.exports.register = function (inversio) {
-  inversio.component({
+module.exports.register = function (container) {
+  container.component({
     name: 'blog-route',
     depends: ['app', 'db'],
     tags: ['route'],

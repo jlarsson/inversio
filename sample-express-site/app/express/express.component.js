@@ -3,8 +3,8 @@
 var debug = require('debug')('sample')
 var express = require('express')
 
-module.exports.register = function (inversio) {
-  inversio.component({
+module.exports.register = function (container) {
+  container.component({
     name: 'app',
     factory: createApp
   })

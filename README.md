@@ -58,6 +58,7 @@ container
 container.inject('A', 'B', function b_inject(a, b) {
   // b will be the value returned from B_factory above.
 })
+.then(...)
 ```
 Since B is dependent on both myService and A, and A is dependent on myService, the above is schematically equivalent (ignoring the singleton aspect) to
 ```js
@@ -69,11 +70,14 @@ b_inject(c2, c3)
 
 ## Special dependencies
 
+### ? (optional)
+Dependencies on the form ```?foo```are resolved normally with name (```foo```) if registered, otherwise ```undefined```.
+
 ### require
 Dependencies on the form ```'require:foo'``` are resolved with ```require('foo')``` rather than looking up a component.
 
 ### tag
-Dependencies on the form ```'tag:bar'``` are resolved with all components tagged with ```'bar'```.
+Dependencies on the form ```'tag:bar'``` are resolved with all components tagged with ```'bar'```. The resolved result is an array of resolved dependencies.
 
 Tagging is straightforward:
 ```js
@@ -101,36 +105,47 @@ My personal preference is to separate the application into modules, each with a 
 > An important principle when working with dependency inversion, is that code that deals with concrete dependency decisions (i.e. which module or class to instantiate) should be kept at a minimum.
 In the example below, main.js knows about the actual application structure, while the modules are blissfully ignorant.
 
-The main script, where modules are listed, registered and composed to an aggregate that is your final application.
+The main script, where modules are discovered, registered and composed to an aggregate that is your final application.
 ```js
-// register interesting modules
-['./app/express/component.js',
-'./app/database/component.js',
-'./app/admin/component.js',
-'./app/users/component.js',
-'./app/blogs/component.js']
-.map(function (m) {
-  // load each module
-  return require(m)
-})
-.reduce(function (inversio, component) {
-  // let each module register it self
-  component.register(inversio)
-}, inversio() /* the container active in reduction */)
-.inject(['app', 'tag:route'], function (app, routes) {
-  // get service app + all services tagged as routes
-  // and start listening
-  app.listen(300)
-})
+glob('app/**/*.component.js')
+  .then(function requireComponents (componentFiles) {
+    return componentFiles.map(function (componentFile) {
+      log('loading component %s', componentFile)
+      return {
+        file: componentFile,
+        module: require('./' + componentFile)
+      }
+    })
+  })
+  .then(function registerComponents (components) {
+    return components.reduce(function (container, component) {
+      log('registering component %s', component.file)
+      component.module.register(container)
+      return container
+    },
+    inversio())
+  })
+  .then(function (container) {
+    log('resolving express app and all routes')
+    return container.inject('app', 'tag:route', function (app) {
+      return app
+    })
+  })
+  .then(function (app) {
+    log('express application listing to port %s', port)
+    app.listen(port)
+  })
 ```
 > ```inject(['app', 'tag:route'], ...)``` does some magic. First, it will get the registered ```app``` service, needed for ```listen()```. But it ill also trigger loading of all modules tagged with `route`, ensuring that the admin, users and blogs routes will be registered with express.
 >
 > The tag syntax for resolving dependencies is vey powerful for ensuring instantiation of service by category without having to know them explicitly.
+>
+> Globbing for modules is quite cool (in my opinion). It basically allows you just drop in a new module. If tagged as routes, they will be part of your express application.
 
 The express module (./app/express/component.js) could be something like
 ```js
-module.exports.register = function (inversio) {
-  return inversio.component({
+module.exports.register = function (container) {
+  return container.component({
     name: 'app',
     factory: createApp
   })
@@ -146,8 +161,8 @@ function createApp() {
 
 The users/admin/blogs module could be something like
 ```js
-module.exports.register = function (inversio) {
-  return inversio.component({
+module.exports.register = function (container) {
+  return container.component({
     name: 'users',
     depends: ['app', 'db']
     tags: ['route']
@@ -164,8 +179,8 @@ function setupRoutes(app, db) {
 
 The database logic could be isolated as
 ```js
-module.exports.register = function (inversio) {
-  return inversio.component({
+module.exports.register = function (container) {
+  return container.component({
     name: 'db',
     factory: configureDatabase
   })
@@ -177,16 +192,6 @@ function configureDatabase() {
 ```
 
 > Having scattered ```component.js``` files, each exporting a function ```register``` for its module registrations, is only a convention used in this example. Other ways of discovering and bootstrapping modules are certainly possible.
-
-## Why not skip dependency injection and just stick to require()?
-```require()``` has the inherent property of binding to concrete implementations.
-> In practice, code dependent on required components are tricky to test in isolation.
-
-```require('../../../../foo/bar')``` and other hard to track dependencies will be the price for maintaining an otherwise sound project structure.
-> Any structure or practice that makes refactoring harder, affects quality (negatively)
-
-Sharing global policies can be tricky.
-> A simple task such as loading and parsing configuration properties often leads to duplicated code.
 
 [travis-image]: https://img.shields.io/travis/jlarsson/inversio.svg?style=flat
 [travis-url]: https://travis-ci.org/jlarsson/inversio
