@@ -53,6 +53,12 @@ container
 ```
 > Note that dependecies to other components are explitly listed in ```depends``` and that the factories have a corresponding argument list.
 
+### Resolve a single component
+```js
+container.resolve('myService')
+.then(function (myService) { ... })
+```
+
 ### Inject components
 ```js
 container.inject('A', 'B', function b_inject(a, b) {
@@ -91,6 +97,15 @@ container
 ```
 
 > Tagging is powerful, since it allows dependencies on the form ***is a*** rather than ***is***.
+
+Order of tagged components can be specified with ```order```:
+
+```js
+container
+  .component({name: 'first', order: -100, ... })
+  .component({name: 'between (no order specified, defaults to 0)', ... })
+  .component({name: 'last', order: 100, ... })
+```
 
 ## Organizing express applications
 
