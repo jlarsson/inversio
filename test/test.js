@@ -59,6 +59,23 @@ describe('container.inject', function () {
   })
 })
 
+describe('container.resolve', function () {
+  it('can resolve a single component', function () {
+    return inversio()
+      .component({
+        name: 'a',
+        factory: function () { return 'value of a' }
+      })
+      .resolve('a')
+      .then(assert.equal.bind(null, 'value of a'))
+  })
+
+  it('fails for missing component', function () {
+    return inversio().resolve('missing')
+      .catch(supressInversioError.bind(null, 'UnresovableDependency'))
+  })
+})
+
 describe('container.inject', function () {
   var s1 = {x: 'this is a service instance'}
   var s2 = {y: 'this is another service instance'}
