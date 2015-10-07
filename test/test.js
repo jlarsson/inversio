@@ -48,8 +48,8 @@ describe('container.inject', function () {
 
   it('caches components, i.e effectively hands out singletons', function () {
     return inversio()
-      .component({name: 'a', factory: function () { return {name: 'a'}}})
-      .component({name: 'b', depends: ['a'], factory: function (a) { return {name: 'b', a: a}}})
+      .component({name: 'a', factory: function () { return {name: 'a'} }})
+      .component({name: 'b', depends: ['a'], factory: function (a) { return {name: 'b', a: a} }})
       .inject('a', 'b', 'a', function (a0, b, a1) {
         assert.deepEqual(a0, {name: 'a'})
         assert.deepEqual(b, {name: 'b', a: a0})
@@ -72,7 +72,7 @@ describe('container.resolve', function () {
 
   it('fails for missing component', function () {
     return inversio().resolve('missing')
-      .catch(supressInversioError.bind(null, 'UnresovableDependency'))
+      .catch(supressInversioError.bind(null, 'UnresolvableDependency'))
   })
 })
 
