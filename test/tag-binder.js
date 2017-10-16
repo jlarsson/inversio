@@ -5,28 +5,26 @@
 var assert = require('assert')
 var inversio = require('../')
 
-describe('tag binder', function () {
-  it('can resolve a list of services matching tag: inject("tag:cool stuff")', function () {
-    return inversio()
+describe('tag binder', () => {
+  it('can resolve a list of services matching tag: inject("tag:cool stuff")',
+    () => inversio()
       .component(
         makeService('a', 'A', ['boring', 'cool stuff']),
         makeService('b', 'B', ['cool stuff']),
         makeService('c', 'C', ['what?'])
       )
-      .inject('tag:cool stuff', function (that) { return that })
-      .then(assert.deepEqual.bind(null, ['A', 'B']))
-  })
+      .inject('tag:cool stuff', that => that)
+      .then(assert.deepEqual.bind(null, ['A', 'B'])))
 
-  it('respects order', function () {
-    return inversio()
+  it('respects order',
+    () => inversio()
       .component(
         makeService('a', 'A', ['t']),
         makeService('b', 'B', ['t'], -100),
         makeService('c', 'C', ['t'], 100)
       )
-      .inject('tag:t', function (that) { return that })
-      .then(assert.deepEqual.bind(null, ['B', 'A', 'C']))
-  })
+      .inject('tag:t', that => that)
+      .then(assert.deepEqual.bind(null, ['B', 'A', 'C'])))
 
   function makeService (name, value, tags, order) {
     return {
