@@ -3,12 +3,12 @@
 'use strict'
 
 var assert = require('assert')
-var _ = require('lodash')
+var fs = require('fs')
 var inversio = require('../')
 
 describe('require binder', () => {
-  it('can resolve using builtin require(): inject("require:lodash")',
+  it('can resolve using builtin require(): inject("require:fs")',
     () => inversio()
-      .inject('require:lodash', ld => ld)
-      .then(ld => assert(_ === ld)))
+      .inject('require:fs', v => v)
+      .then(rfs => assert(rfs === fs)))
 })

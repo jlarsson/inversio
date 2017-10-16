@@ -1,6 +1,6 @@
 # inversio
 
-A working dependency injection system for express and koa.
+A Promise-based dependency injection system.
 
 [![npm][npm-image]][npm-url]
 [![travis][travis-image]][travis-url]
@@ -21,7 +21,7 @@ Make sure you have a version of node with a native (or shim) Promise implementat
 
 ### Create a container
 ```js
-var container = require('inversio')
+var container = require('inversio')()
 ```
 > A container is repository of components. It keeps track of their names, dependencies and how and when they are instantiated.
 
@@ -32,8 +32,9 @@ container.component({
   factory: function myService_factory() { return ... }
 })
 ```
-> ```name``` must be unique and can be used by dependant components to reference the component.
-```factory``` is a function that returns a service instance or a promised service instance.
+> ```name``` must be unique and can be used by dependant components to reference the component. Anonymous components are allowed if tags are specified (as in ```{tags: ['a'], factory: () => {...}}```).
+
+> ```factory``` is a function that returns a service instance or a promised service instance.
 
 > **Important**: the factory is invoked only once during the container lifetime, effectively making components singletons.
 
@@ -55,16 +56,18 @@ container
 
 ### Resolve a single component
 ```js
-container.resolve('myService')
-.then(function (myService) { ... })
+container
+  .resolve('myService')
+  .then(myService => { ... })
 ```
 
 ### Inject components
 ```js
-container.inject('A', 'B', function b_inject(a, b) {
-  // b will be the value returned from B_factory above.
-})
-.then(...)
+container
+  .inject('A', 'B', function b_inject(a, b) {
+    // b will be the value returned from B_factory above.
+  })
+  .then(...)
 ```
 Since B is dependent on both myService and A, and A is dependent on myService, the above is schematically equivalent (ignoring the singleton aspect) to
 ```js
@@ -79,8 +82,22 @@ b_inject(c2, c3)
 ### ? (optional)
 Dependencies on the form ```?foo```are resolved normally with name (```foo```) if registered, otherwise ```undefined```.
 
+```js
+container
+  .resolve('?missing') // => undefined
+
+container
+  .component({name: 'a', factory: () => 'A'})
+  .resolve('?a') // => 'A'
+```
+
 ### require
 Dependencies on the form ```'require:foo'``` are resolved with ```require('foo')``` rather than looking up a component.
+
+```js
+container
+  .resolve('require:fs') // => require('fs')
+```
 
 ### tag
 Dependencies on the form ```'tag:bar'``` are resolved with all components tagged with ```'bar'```. The resolved result is an array of resolved dependencies.
@@ -106,6 +123,32 @@ container
   .component({name: 'between (no order specified, defaults to 0)', ... })
   .component({name: 'last', order: 100, ... })
 ```
+
+### Decorators, mixins and subclassing
+The decorator pattern and the particular case of subclassing/mixins are expressed
+using (replace &lt;name&gt; below with something in your liking)
+- a named root (such as a base class) named ```'super:<name>'```
+- decorators (or mixins)  named ```'extends:<name>'```
+- a concrete binding named ```'class:<name>'``` which combines ___super:___ and ___extends:___ in a natural way.
+
+Decorators are expected to mapping from one value to another.
+
+Consider the following composition:
+```js
+console.log(foo(bar('X')))
+```
+
+This can be expressed and evaluated with
+```js
+container
+  .component({name: 'super:x', factory: () => 'X'})
+  .component({tags: ['extends:x'], factory: bar})
+  .component({tags: ['extends:x'], factory: foo})
+  .resolve('class:x')
+  .then(console.log) // --> console.log(foo(bar('X')))
+```
+
+The motivation for ___super:___, ___extends:___ and ___class:___ comes from real world applications where class composition like ```class A extends (class B extends ... extends SomeBaseClass)``` is achieved using the mechanisms above.
 
 ## Organizing express applications
 

@@ -3,8 +3,9 @@
 'use strict'
 
 const assert = require('assert')
-const _ = require('lodash')
 const inversio = require('../')
+
+const noop = () => {}
 
 describe('container.inject', () => {
   it('builds object graphs correctly',
@@ -28,9 +29,9 @@ describe('container.inject', () => {
 
   it('throws on circular dependencies',
     () => inversio()
-      .component({name: 'a', depends: ['b'], factory: _.noop})
-      .component({name: 'b', depends: ['c'], factory: _.noop})
-      .component({name: 'c', depends: ['a'], factory: _.noop})
+      .component({name: 'a', depends: ['b'], factory: noop})
+      .component({name: 'b', depends: ['c'], factory: noop})
+      .component({name: 'c', depends: ['a'], factory: noop})
       .inject('a', a => assert.fail('should never reach this'))
       .catch(supressInversioError.bind(null, 'CircularDependency')))
 
@@ -94,8 +95,8 @@ describe('container.component({name,depends,tags,factory}) parameter validation'
   it('fails if name is not unique',
     () => assertInversioThrows('ComponentNameDuplicate',
       () => inversio()
-        .component({name: 'a', factory: _.noop})
-        .component({name: 'a', factory: _.noop})))
+        .component({name: 'a', factory: noop})
+        .component({name: 'a', factory: noop})))
 
   it('fails if name is empty',
     () => assertInversioThrows('ComponentNameIsEmpty',
@@ -129,17 +130,17 @@ describe('container.component({name,depends,tags,factory}) parameter validation'
   it('fails if depends is not array',
     () => assertInversioThrows('ComponentDependsNotArray',
       () => inversio()
-        .component({name: 's', factory: _.noop, depends: {}})))
+        .component({name: 's', factory: noop, depends: {}})))
 
   it('fails if tags is not array',
     () => assertInversioThrows('ComponentTagsNotArray',
       () => inversio()
-        .component({name: 's', factory: _.noop, tags: {}})))
+        .component({name: 's', factory: noop, tags: {}})))
 
   it('fails if tags is not array of strings',
     () => assertInversioThrows('ComponentTagsNotStringArray',
       () => inversio()
-        .component({name: 's', factory: _.noop, tags: [123, {}]})))
+        .component({name: 's', factory: noop, tags: [123, {}]})))
 
   it('allows empty name if tags are specified',
     () => inversio()
