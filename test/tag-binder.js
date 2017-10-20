@@ -16,6 +16,11 @@ describe('tag binder', () => {
       .inject('tag:cool stuff', that => that)
       .then(assert.deepEqual.bind(null, ['A', 'B'])))
 
+  it('allows anonymous components',
+    () => inversio()
+      .component({tags: ['a'], factory: () => 'a'})
+      .component({tags: ['a'], factory: () => 'a2'}))
+
   it('respects order',
     () => inversio()
       .component(

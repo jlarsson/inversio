@@ -8,12 +8,8 @@ A Promise-based dependency injection system.
 [![js-standard-style][standard-image]][standard-url]
 
 ## Motivation
-- I needed a clean and intuitive way of organizing large applications into truly separate modules
-- I wanted out of require-hell
-
-Before this write up, I have tried approaches such as [this](https://strongloop.com/strongblog/modular-node-js-express/) and different [libraries](http://www.mariocasciaro.me/dependency-injection-in-node-js-and-other-architectural-patterns), with little satisfaction.
-
-[Architect from Cloud9](https://github.com/c9/architect) was my previous first choice for DI, and if you don't like this, try that out.
+- Clean and intuitive way of organizing large applications into truly separate modules
+- A cure for require-hell
 
 ## The basics
 
@@ -32,7 +28,7 @@ container.component({
   factory: function myService_factory() { return ... }
 })
 ```
-> ```name``` must be unique and can be used by dependant components to reference the component. Anonymous components are allowed if tags are specified (as in ```{tags: ['a'], factory: () => {...}}```).
+> ```name``` must be unique (unless _timid_ or _tags_ are specified) and can be used by dependant components to reference the component. Anonymous components are allowed if tags are specified (as in ```{tags: ['a'], factory: () => {...}}```).
 
 > ```factory``` is a function that returns a service instance or a promised service instance.
 
@@ -54,27 +50,48 @@ container
 ```
 > Note that dependecies to other components are explitly listed in ```depends``` and that the factories have a corresponding argument list.
 
-### Resolve a single component
+### Resolving components
+
+__resolve__(_name_) is used for resolving a single component.
+__inject__(_...names_, _optional factory_) is used for resolving a multiple components at once.
+
+_resolve()_ and _inject()_ both returns promises, but evaluation of dependencies and invokation of factories will be with settled values - using natural, synchronous composition.
+
 ```js
 container
   .resolve('myService')
-  .then(myService => { ... })
-```
+  .then(myService => ...) <!-- resolve single component
 
-### Inject components
+container
+  .inject('a', 'b', 'c')
+  .then([a ,b ,c] => ...) <!-- resolve multiple components
+
+container
+  .inject(['a', 'b', 'c'])
+  .then([a ,b ,c] => ...) <!-- resolve multiple components
+
+container
+  .inject('a', 'b', 'c', f)
+  .then(value => ...) <!-- value will be f(a, b, c)
+
+container
+  .inject(['a', 'b', 'c'], f)
+  .then(value => ...) <!-- value will be f(a, b, c)
+```
+### Timid components
+A timid component must be named and may be overwritten by another component with the same name, unless already resolved.
+
 ```js
 container
-  .inject('A', 'B', function b_inject(a, b) {
-    // b will be the value returned from B_factory above.
+  .component({
+    name: 'A',
+    timid: true,
+    factory: () => 'timid one'
   })
-  .then(...)
-```
-Since B is dependent on both myService and A, and A is dependent on myService, the above is schematically equivalent (ignoring the singleton aspect) to
-```js
-var c1 = myService_factory()
-var c2 = A_factory(c1)
-var c3 = B_factory(c1, c2)
-b_inject(c2, c3)
+  .component({
+    name: 'A',
+    factory: () => 'the bold winner...'
+  })
 ```
 
 ## Special dependencies
@@ -101,6 +118,8 @@ container
 
 ### tag
 Dependencies on the form ```'tag:bar'``` are resolved with all components tagged with ```'bar'```. The resolved result is an array of resolved dependencies.
+
+> Tagged components can be anonymous, i.e. _name_ must not be specified.
 
 Tagging is straightforward:
 ```js
@@ -131,7 +150,7 @@ using (replace &lt;name&gt; below with something in your liking)
 - decorators (or mixins)  named ```'extends:<name>'```
 - a concrete binding named ```'class:<name>'``` which combines ___super:___ and ___extends:___ in a natural way.
 
-Decorators are expected to mapping from one value to another.
+Decorators are expected to map from one value to another.
 
 Consider the following composition:
 ```js

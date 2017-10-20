@@ -9,7 +9,7 @@ class TestSuper {
   foo () { this.superIsCalled = true }
 }
 
-describe('mixin binder', () => {
+describe('class binder', () => {
   it('can construct a class based on super class and mixins',
     () => inversio()
       .component({

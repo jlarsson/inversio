@@ -89,6 +89,11 @@ describe('container.inject', () => {
     () => createContainer()
       .inject('s1', 's2', 's3')
       .then(l => assert.deepEqual([s1, s2, s3], l)))
+
+  it('inject([a, b, c]) -> [component(a), component(b), component(c)] if no callback',
+    () => createContainer()
+      .inject(['s1', 's2', 's3'])
+      .then(l => assert.deepEqual([s1, s2, s3], l)))
 })
 
 describe('container.component({name,depends,tags,factory}) parameter validation', () => {
@@ -98,7 +103,7 @@ describe('container.component({name,depends,tags,factory}) parameter validation'
         .component({name: 'a', factory: noop})
         .component({name: 'a', factory: noop})))
 
-  it('fails if name is empty',
+  it('fails if name is empty (and no tags or timid...)',
     () => assertInversioThrows('ComponentNameIsEmpty',
       () => inversio()
         .component({})))
@@ -149,6 +154,41 @@ describe('container.component({name,depends,tags,factory}) parameter validation'
       .then(l => assert.deepEqual(['a1'], l)))
 })
 
+describe('container.component({timid})', () => {
+  it('timid unresolved components can be overriden',
+    () => inversio()
+      .component({name: 'a', timid: true, factory: () => 'timid A'})
+      .component({name: 'a', factory: () => 'bold A'})
+      .resolve('a')
+      .then(v => assert.equal(v, 'bold A')))
+
+  it('timid wins over previsous timid',
+    () => inversio()
+      .component({name: 'a', timid: true, factory: () => 'timid A'})
+      .component({name: 'a', timid: true, factory: () => 'second timid'})
+      .resolve('a')
+      .then(v => assert.equal(v, 'second timid')))
+
+  it('timids all lose in the end',
+    () => inversio()
+      .component({name: 'a', timid: true, factory: () => 'timid A'})
+      .component({name: 'a', timid: true, factory: () => 'second timid'})
+      .component({name: 'a', factory: () => 'bold A'})
+      .resolve('a')
+      .then(v => assert.equal(v, 'bold A')))
+
+  it('timid resolved components can\'t be overriden',
+    () => assertInversioThrows(
+      'ComponentNameDuplicate',
+      () => {
+        let container = inversio()
+        return container
+          .component({name: 'a', timid: true, factory: () => 'timid A'})
+          .resolve('a') // <-- after resolving the timid is fixed and can't be replaced
+          .then(() => container.component({name: 'a', factory: () => 'bold A'}))
+      }))
+})
+
 function supressInversioError (code, err) {
   if (!(err && (err.code === code))) {
     throw err
@@ -156,10 +196,10 @@ function supressInversioError (code, err) {
 }
 
 function assertInversioThrows (code, f) {
-  try {
-    f()
-    assert.fail(`Expected exception ${code}`)
-  } catch (e) {
-    supressInversioError(code, e)
-  }
+  return Promise.resolve()
+    .then(() => f())
+    .then(() => assert.fail(`Expected exception ${code}`))
+    .catch(err => {
+      if (err.code !== code) throw err
+    })
 }
