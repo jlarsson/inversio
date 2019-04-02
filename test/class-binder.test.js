@@ -1,17 +1,13 @@
-/* global describe, it */
-
-'use strict'
-
-var assert = require('assert')
-var inversio = require('../')
+const inversio = require('../')
+const {Suite} = require('./util')
 
 class TestSuper {
   foo () { this.superIsCalled = true }
 }
 
-describe('class binder', () => {
-  it('can construct a class based on super class and mixins',
-    () => inversio()
+new Suite('class binder')
+  .test('can construct a class based on super class and mixins',
+    t => inversio()
       .component({
         name: 'super:Test',
         factory: () => TestSuper
@@ -40,8 +36,9 @@ describe('class binder', () => {
       .then(T => new T())
       .then(instance => {
         instance.foo()
-        assert(instance.superIsCalled, 'Expected super class')
-        assert(instance.subIsCalled, 'Expected extended class')
-        assert(instance.sub2IsCalled, 'Expected second extended class')
+        t.ok(instance.superIsCalled, 'Expected super class')
+        t.ok(instance.superIsCalled, 'Expected super class')
+        t.ok(instance.subIsCalled, 'Expected extended class')
+        t.ok(instance.sub2IsCalled, 'Expected second extended class')
       }))
-})
+  .run()

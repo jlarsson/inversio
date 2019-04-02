@@ -1,12 +1,9 @@
-/* global describe, it */
+const assert = require('assert')
+const inversio = require('../')
+const {Suite} = require('./util')
 
-'use strict'
-
-var assert = require('assert')
-var inversio = require('../')
-
-describe('optional binder', () => {
-  it('resolves to undefined for unregistered services',
+new Suite('optional binder')
+  .test('resolves to undefined for unregistered services',
     () => inversio()
       .component({
         name: 'A',
@@ -14,4 +11,4 @@ describe('optional binder', () => {
       })
       .inject('A', '?A', '?missing', 'A')
       .then(assert.deepEqual.bind(null, ['A', 'A', undefined, 'A'])))
-})
+  .run()

@@ -1,12 +1,19 @@
-/* global describe, it */
+const assert = require('assert')
+const inversio = require('../')
+const {Suite} = require('./util')
 
-'use strict'
+const makeService = (name, value, tags, order) => ({
+    name: name,
+    tags: tags,
+    order: order,
+    factory: function () {
+      return value
+    }
+  })
 
-var assert = require('assert')
-var inversio = require('../')
 
-describe('tag binder', () => {
-  it('can resolve a list of services matching tag: inject("tag:cool stuff")',
+new Suite('tag binder')
+  .test('can resolve a list of services matching tag: inject("tag:cool stuff")',
     () => inversio()
       .component(
         makeService('a', 'A', ['boring', 'cool stuff']),
@@ -16,12 +23,12 @@ describe('tag binder', () => {
       .inject('tag:cool stuff', that => that)
       .then(assert.deepEqual.bind(null, ['A', 'B'])))
 
-  it('allows anonymous components',
+  .test('allows anonymous components',
     () => inversio()
       .component({tags: ['a'], factory: () => 'a'})
       .component({tags: ['a'], factory: () => 'a2'}))
 
-  it('respects order',
+  .test('respects order',
     () => inversio()
       .component(
         makeService('a', 'A', ['t']),
@@ -32,7 +39,7 @@ describe('tag binder', () => {
       .inject('tag:t', that => that)
       .then(assert.deepEqual.bind(null, ['D', 'B', 'A', 'C'])))
 
-  it('throws on self-circular dependencies',
+  .test('throws on self-circular dependencies',
     // a is tagged as being a and also depends on all tagged as being a...
     () => inversio()
       .component(
@@ -42,7 +49,7 @@ describe('tag binder', () => {
       .then(() => assert.fail('Expected exception'))
       .catch(e => assert.equal(e.code, 'CircularDependency')))
 
-  it('throws on circular dependencies',
+  .test('throws on circular dependencies',
     // A(B, B2(C(A)))
     () => inversio()
       .component(
@@ -54,15 +61,4 @@ describe('tag binder', () => {
       .resolve('a')
       .then(() => assert.fail('Expected exception'))
       .catch(e => assert.equal(e.code, 'CircularDependency')))
-
-  function makeService (name, value, tags, order) {
-    return {
-      name: name,
-      tags: tags,
-      order: order,
-      factory: function () {
-        return value
-      }
-    }
-  }
-})
+  .run()
